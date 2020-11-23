@@ -7,7 +7,10 @@ import easygui as ui
 foodlist = FoodList()
 
 # Step 1: Load the food list
-loadable = foodlist.check_food_list()
+foodlist.load_food()  # In case there is no food list, an empty list gets loaded
+
+# Step 2: Starting the main loop and showing the options to the user
+# We will use easygui.buttonbox
 
 
 

@@ -1,3 +1,6 @@
+import collections
+
+
 class Food:
 
     def __init__(self, name):
@@ -11,6 +14,15 @@ class Food:
 
     def __eq__(self, other):
         return self.name == other.name
+
+    def extensive_eq(self, other):
+        equality = True
+        equality = equality and (self.name == other.name)
+        equality = equality and (collections.Counter(self.ingredients) == collections.Counter(other.ingredients))
+        equality = equality and (self.minimums == other.minimums)
+        equality = equality and (self.maximums == other.maximums)
+        equality = equality and (collections.Counter(self.optionals) == collections.Counter(other.optionals))
+        return equality
 
     @property
     def name(self):
