@@ -20,4 +20,7 @@ class TestFoodList(TestCase):
         old_list = self.list.food
         self.assertTrue(new_list == old_list)
 
+    def test_non_existing_food_file(self):
+        empty_list = self.list.read_food_file("non_existing_file")
+        self.assertEqual(empty_list, [])
 
