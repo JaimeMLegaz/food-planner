@@ -5,7 +5,14 @@ class Ingredient:
         self.calories = calories
         self.carbs = carbs
         self.proteins = proteins
-        self.fat = fats
+        self.fats = fats
+
+    def __eq__(self, other):
+        return((self.name == other.name) and
+               (self.calories == other.calories) and
+               (self.carbs == other.carbs) and
+               (self.proteins == other.proteins) and
+               (self.fats == other.fats))
 
     @property
     def name(self):
@@ -40,10 +47,10 @@ class Ingredient:
         self._carbs = new_carbs
 
     @property
-    def fat(self):
-        return self._fat
+    def fats(self):
+        return self._fats
 
-    @fat.setter
-    def fat(self, new_fat):
-        self._fat = new_fat
+    @fats.setter
+    def fats(self, new_fat):
+        self._fats = new_fat
 
