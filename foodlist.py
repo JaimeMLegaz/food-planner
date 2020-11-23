@@ -7,6 +7,15 @@ class FoodList:
         self.food = []
         self.filename = filename
 
+    def extensive_eq(self, list2):
+        list1 = self.food
+        list1.sort()
+        list2.sort()
+        equality = True
+        for i in range(len(list1)):
+            equality = equality and list1[i].extensive_eq(list2[i])
+        return equality
+
     @property
     def filename(self):
         return self._filename
