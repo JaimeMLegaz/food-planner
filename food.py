@@ -11,11 +11,11 @@ class Food:
 
     @property
     def name(self):
-        return self.name
+        return self._name
 
     @name.setter
     def name(self, new_name):
-        self.name = new_name
+        self._name = new_name
 
     def add_ingredient(self, ingredient, minimum, maximum, optional=False):
         self.ingredients.append(ingredient)
