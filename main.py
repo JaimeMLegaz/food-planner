@@ -10,7 +10,10 @@ foodlist = FoodList()
 foodlist.load_food()  # In case there is no food list, an empty list gets loaded
 
 # Step 2: Starting the main loop and showing the options to the user
-# We will use easygui.buttonbox
+next_action = "Default"
+while next_action:
+    next_action = ui.buttonbox("Select the action", "Action select", ("Add ingredient", "Add food", "Plan my meal!"))
+
 
 
 
