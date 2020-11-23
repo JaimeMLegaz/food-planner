@@ -14,8 +14,10 @@ class TestFoodList(TestCase):
         self.list.add_food(empty_food)
         self.assertEqual(old_size + 1, len(self.list.food))
 
-    def test_save_food(self):
-        self.fail()
+    def test_read_food_file(self):
+        self.list.save_food()
+        new_list = self.list.read_food_file(self.list.filename)
+        old_list = self.list.food
+        self.assertTrue(new_list == old_list)
 
-    def test_load_food(self):
-        self.fail()
+

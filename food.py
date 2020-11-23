@@ -9,6 +9,9 @@ class Food:
 
     #  self.proportions = {}
 
+    def __eq__(self, other):
+        return self.name == other.name
+
     @property
     def name(self):
         return self._name

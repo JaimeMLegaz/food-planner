@@ -15,9 +15,13 @@ class FoodList:
         pickle.dump(self.food, outfile)
         outfile.close()
 
-    def load_food(self):
-        infile = open(self.filename, "rb")
-        new_food = pickle.load(infile)
-        print(new_food == self.food)
+    @staticmethod
+    def read_food_file(filename):
+        infile = open(filename, "rb")
+        new_list = pickle.load(infile)
         infile.close()
+        return new_list
+
+    def load_food(self):
+        self.food = self.read_food_file(self.filename)
 
