@@ -15,9 +15,15 @@ class TestFoodList(TestCase):
         banana_split.add_ingredient(banana_ing, 100, 100)
         cream_ing = Ingredient("cream", 190, 100, 10, 50)
         banana_split.add_ingredient(cream_ing, 25, 45, True)
+        sandwich = Food("sandwich")
+        bread_ing = Ingredient("bread", 100, 80, 0, 20)
+        ham_ing = Ingredient("ham", 60, 5, 30, 10)
+        sandwich.add_ingredient(bread_ing, 100, 100)
+        sandwich.add_ingredient(ham_ing, 100, 100)
 
         self.list.add_food(banana_split)  # We add the food to the list
-        self.assertEqual(old_size + 1, len(self.list.food))  # We check if the list is bigger by one element
+        self.list.add_food(sandwich)  # We add the food to the list
+        self.assertEqual(old_size + 2, len(self.list.food))  # We check if the list is bigger by one element
 
     def test_read_food_file(self):
         self.list.save_food()  # We save the current list (it counts the previous additions) to a file

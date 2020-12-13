@@ -7,6 +7,7 @@ class IngredientList:
         self.ingredients = []
         self.filename = filename
 
+    # Checks extensively if two lists of ingredients are equal (same elements and order)
     def extensive_eq(self, list2):
         list1 = self.ingredients
         list1.sort()
@@ -27,11 +28,13 @@ class IngredientList:
     def add_ingredient(self, new_ing):
         self.ingredients.append(new_ing)
 
+    # Saves the list to a file
     def save_ingredients(self):
         outfile = open(self.filename, "wb")
         pickle.dump(self.ingredients, outfile)
         outfile.close()
 
+    # Loads the ingredients from a file
     @staticmethod
     def read_ingredients_file(filename):
         try:

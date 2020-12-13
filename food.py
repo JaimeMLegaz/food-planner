@@ -15,6 +15,9 @@ class Food:
     def __eq__(self, other):
         return self.name == other.name
 
+    def __lt__(self, other):
+        return self.name < other.name
+
     def extensive_eq(self, other):
         equality = True
         equality = equality and (self.name == other.name)
