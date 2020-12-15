@@ -27,9 +27,11 @@ class IngredientList:
 
     def add_ingredient(self, new_ing):
         self.ingredients.append(new_ing)
+        self.save_ingredients()
 
     # Saves the list to a file
     def save_ingredients(self):
+        print("saving " + str(len(self.ingredients)))
         outfile = open(self.filename, "wb")
         pickle.dump(self.ingredients, outfile)
         outfile.close()
