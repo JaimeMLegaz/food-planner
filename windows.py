@@ -8,12 +8,38 @@ class Windows:
     def __init__(self, foodlist, ingredientlist):
         self.food_list = foodlist
         self.ingredient_list = ingredientlist
+        self.window = self.base_window()
+        self.current_frame = self.ingredients_win(self.window)
+        self.current_frame.grid(column=0, row=0)
 
     def add_food(self, food_entry):
         print("Adding " + food_entry.get())
 
     def remove_food(self):
         print("Remove food")
+
+    def base_window(self):
+        window = tk.Tk()
+        window.title("BaseWindow")
+        return window
+
+    def ingredients_win(self, window):
+        frame = tk.Frame(window)
+
+        lab_title = tk.Label(frame, text="List of Ingredients")
+        list_ing = tk.Listbox(frame)
+        for ing in self.ingredient_list.ingredients:
+            list_ing.insert(tk.END, ing.name)
+        but_remove = tk.Button(frame, text="Remove Ingredient")
+        but_add = tk.Button(frame, text="Add Ingredient")
+
+        lab_title.grid(column=1, row=1, columnspan=2, pady=10)
+        list_ing.grid(column=1, row=2, rowspan=3, columnspan=2)
+        but_remove.grid(column=1, row=5, padx=10, pady=10)
+        but_add.grid(column=2, row=5, padx=(0, 10), pady=10)
+
+        return frame
+
 
     @staticmethod
     def window_main():
@@ -49,19 +75,17 @@ class Windows:
         but3.pack()
         return window
 
-    def win_add_food(self):
-        window = tk.Tk()
-        window.title("Food Planner")
+    def win_add_food(self, window):
+        frame = tk.Frame(window)
 
-        window.rowconfigure(4, minsize=20)
-        window.resizable(False, False)
+        frame.rowconfigure(4, minsize=20)
 
         # Middle frame
-        frame2 = tk.Frame(master=window)
+        frame2 = tk.Frame(master=frame)
         frame2.grid(column=2, row=1)
 
         # Content of left frame
-        listbox_left = tk.Listbox()
+        listbox_left = tk.Listbox(frame)
         for food in self.food_list.food:
             listbox_left.insert(tk.END, food.name)
         listbox_left.grid(column=1, row=1, rowspan=4, pady=15, padx=10)
@@ -81,30 +105,12 @@ class Windows:
         button_remove.grid(column=2, row=3, pady=(0, 10))
 
         # Content of left frame
-        listbox_right = tk.Listbox()
+        listbox_right = tk.Listbox(frame)
         for food in self.food_list.food:
             listbox_right.insert(tk.END, food.name)
         listbox_right.grid(column=3, row=1, rowspan=4, pady=15, padx=10)
 
-        return window
-
-    def ingredients_win(self):
-        window = tk.Tk()
-        window.title("Adding Ingredient")
-
-        lab_title = tk.Label(window, text="List of Ingredients")
-        list_ing = tk.Listbox()
-        for ing in self.ingredient_list.ingredients:
-            list_ing.insert(tk.END, ing.name)
-        but_remove = tk.Button(window, text="Remove Ingredient")
-        but_add = tk.Button(window, text="Add Ingredient")
-
-        lab_title.grid(column=1, row=1, columnspan=2, pady=10)
-        list_ing.grid(column=1, row=2, rowspan=3, columnspan=2)
-        but_remove.grid(column=1, row=5, padx=10, pady=10)
-        but_add.grid(column=2, row=5, padx=(0, 10), pady=10)
-
-        return window
+        return frame
 
     def add_ingredient_win(self):
         window = tk.Tk()

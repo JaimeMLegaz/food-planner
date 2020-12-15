@@ -16,7 +16,7 @@ food_list.load_food()  # In case there is no food list, an empty list gets loade
 ingredient_list.load_ingredients()
 
 # Step 2: Starting the main loop and showing the options to the user
-win = windows.add_ingredient_win()
+win = windows.window
 win.mainloop()
 
 
