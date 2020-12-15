@@ -26,6 +26,7 @@ class FoodList:
 
     def add_food(self, new_food):
         self.food.append(new_food)
+        self.save_food()
 
     def save_food(self):
         outfile = open(self.filename, "wb")

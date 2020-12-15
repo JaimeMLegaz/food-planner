@@ -36,9 +36,16 @@ class Windows:
         return window
 
     def add_ingredient(self, name, calories, carbs, proteins, fats):
-        new_ingredient = Ingredient(name, calories, carbs, proteins, fats)
-        print(new_ingredient.name + " <-- name")
+        new_ingredient = Ingredient(name.get(), calories.get(), carbs.get(), proteins.get(), fats.get())
         self.ingredient_list.add_ingredient(new_ingredient)
+        self.frames["ings"] = self.ingredients_win(self.window)
+        self.goto_page("ings")
+
+    def remove_ingredient(self, ingredient):
+        if ingredient.curselection():
+            self.ingredient_list.remove_ingredient(ingredient.curselection()[0])
+        self.frames["ings"] = self.ingredients_win(self.window)
+        self.goto_page("ings")
 
     def ingredients_win(self, window):
         frame = tk.Frame(window)
@@ -47,7 +54,7 @@ class Windows:
         list_ing = tk.Listbox(frame)
         for ing in self.ingredient_list.ingredients:
             list_ing.insert(tk.END, ing.name)
-        but_remove = tk.Button(frame, text="Remove Ingredient")
+        but_remove = tk.Button(frame, text="Remove Ingredient", command=partial(self.remove_ingredient, list_ing))
 
         but_add = tk.Button(frame, text="Add Ingredient", command=partial(self.goto_page, "add_ing"))
 
@@ -145,14 +152,11 @@ class Windows:
 
             row_num += 1
 
-        for name in entry_names:
-            print(entries[name].get())
-
-        add_button = tk.Button(frame, text="Add", command=partial(self.add_ingredient, entries["Name"].get(),
-                                                                  entries["Calories/100gr"].get(),
-                                                                  entries["Carbs/100gr"].get(),
-                                                                  entries["Proteins/100gr"].get(),
-                                                                  entries["Fats/100gr"].get()))
+        add_button = tk.Button(frame, text="Add", command=partial(self.add_ingredient, entries["Name"],
+                                                                  entries["Calories/100gr"],
+                                                                  entries["Carbs/100gr"],
+                                                                  entries["Proteins/100gr"],
+                                                                  entries["Fats/100gr"]))
 
         add_button.grid(column=1, row=row_num, columnspan=2, pady=(5, 10))
 

@@ -29,6 +29,10 @@ class IngredientList:
         self.ingredients.append(new_ing)
         self.save_ingredients()
 
+    def remove_ingredient(self, index):
+        del self.ingredients[index]
+        self.save_ingredients()
+
     # Saves the list to a file
     def save_ingredients(self):
         print("saving " + str(len(self.ingredients)))
