@@ -28,6 +28,10 @@ class FoodList:
         self.food.append(new_food)
         self.save_food()
 
+    def remove_food(self, index):
+        del self.food[index]
+        self.save_food()
+
     def save_food(self):
         outfile = open(self.filename, "wb")
         pickle.dump(self.food, outfile)

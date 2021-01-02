@@ -35,7 +35,7 @@ class Food:
     def name(self, new_name):
         self._name = new_name
 
-    def add_ingredient(self, ingredient, minimum, maximum, optional=False):
+    def add_ingredient(self, ingredient, minimum=0, maximum=100, optional=False):
         self.ingredients.append(ingredient)
         self.minimums[ingredient.name] = minimum
         self.maximums[ingredient.name] = maximum

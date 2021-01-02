@@ -2,6 +2,9 @@ import tkinter as tk
 from functools import partial
 from foodlist import FoodList
 from ingredient import Ingredient
+from food import Food
+import tkinter.font as font
+import re
 
 
 class Windows:
@@ -11,55 +14,93 @@ class Windows:
         self.ingredient_list = ingredientlist
         self.window = self.base_window()
 
+        # List of available frames this window will use
         self.frames = {"ings": self.ingredients_win(self.window),
+                       "foods": self.food_win(self.window),
                        "add_food": self.add_food_win(self.window),
                        "add_ing": self.add_ingredient_win(self.window),
-                       "main": self.main_win(self.window)}
+                       "main": self.main_win(self.window),
+                       "food_list_ing": self.food_list_of_ingredients(self.window, None)}
 
         self.current_frame = self.frames["main"]
         self.current_frame.grid(column=0, row=0)
 
+    # Replaces the current frame
     def goto_page(self, page_name):
         self.current_frame.grid_remove()
         self.current_frame = self.frames[page_name]
         self.current_frame.grid(column=0, row=0)
 
-    def add_food(self, food_entry):
-        print("Adding " + food_entry.get())
+    def filter_search(self, page_name, **kwargs):
 
-    def remove_food(self):
-        print("Remove food")
+    def remove_food(self, food):
+        if food.curselection():
+            self.food_list.remove_food(food.curselection()[0])  # TODO Add method
+        # Refresh the frame
+        self.frames["foods"] = self.food_win(self.window)
+        self.goto_page("foods")
 
     def base_window(self):
         window = tk.Tk()
-        window.title("BaseWindow")
+        window.title("FoodPlanner")
         return window
 
+    # Adds an ingredient to the list and updates it
     def add_ingredient(self, name, calories, carbs, proteins, fats):
         new_ingredient = Ingredient(name.get(), calories.get(), carbs.get(), proteins.get(), fats.get())
         self.ingredient_list.add_ingredient(new_ingredient)
+        # Refresh the frame
         self.frames["ings"] = self.ingredients_win(self.window)
         self.goto_page("ings")
 
     def remove_ingredient(self, ingredient):
         if ingredient.curselection():
             self.ingredient_list.remove_ingredient(ingredient.curselection()[0])
+        # Refresh the frame
         self.frames["ings"] = self.ingredients_win(self.window)
         self.goto_page("ings")
+
+    def add_food_ingredients(self, ingredient, ingredients_list, food_name):
+        if ingredient.curselection():
+            print("ENTER IF")
+            index = ingredient.curselection()[0]  # Returns an index
+            new_ing = self.ingredient_list.ingredients[index]
+            ingredients_list.append(new_ing)
+            print("size =" + str(len(ingredients_list)))
+            # Refresh the frame
+            self.frames["add_food"] = self.add_food_win(self.window, ingredients_list, food_name.get())
+            self.goto_page("add_food")
+
+    def add_food(self, food_name, ingredients):
+        if food_name.get() and (len(ingredients) >= 1):
+            new_food = Food(food_name.get())
+            for ingredient in ingredients:
+                new_food.add_ingredient(ingredient)
+
+            # Update the frame
+            self.frames["food_list_ing"] = self.food_list_of_ingredients(self.window, new_food)
+            self.goto_page("food_list_ing")
+        else:
+            print("NONAME")
 
     def ingredients_win(self, window):
         frame = tk.Frame(window)
 
         lab_title = tk.Label(frame, text="List of Ingredients")
-        list_ing = tk.Listbox(frame)
+        list_ing = tk.Listbox(frame, width=43)
         for ing in self.ingredient_list.ingredients:
             list_ing.insert(tk.END, ing.name)
         but_remove = tk.Button(frame, text="Remove Ingredient", command=partial(self.remove_ingredient, list_ing))
 
+        scrollbar = tk.Scrollbar(frame)
+        list_ing.config(yscrollcommand=scrollbar.set)
+        scrollbar.config(command=list_ing.yview)
+
         but_add = tk.Button(frame, text="Add Ingredient", command=partial(self.goto_page, "add_ing"))
 
         lab_title.grid(column=1, row=1, columnspan=2, pady=10)
-        list_ing.grid(column=1, row=2, rowspan=3, columnspan=2)
+        list_ing.grid(column=1, row=2, rowspan=3, columnspan=2, padx=(10, 0))
+        scrollbar.grid(column=3, row=2, rowspan=3, sticky="wns", padx=(0, 10))
         but_remove.grid(column=1, row=5, padx=10, pady=10)
         but_add.grid(column=2, row=5, padx=(0, 10), pady=10)
 
@@ -87,7 +128,7 @@ class Windows:
         f4.grid(row=1, column=2, padx=20, pady=10)
 
         txt = tk.Label(master=f1, text="Select your next action", height=7)
-        but1 = tk.Button(master=f2, text="Add food", width=20, command=partial(self.goto_page, "add_food"))
+        but1 = tk.Button(master=f2, text="Add food", width=20, command=partial(self.goto_page, "foods"))
         but2 = tk.Button(master=f3, text="Plan meals", width=20)
         but3 = tk.Button(master=f4, text="Add ingredient", width=20, command=partial(self.goto_page, "ings"))
         txt.pack()
@@ -96,40 +137,82 @@ class Windows:
         but3.pack()
         return frame
 
-    def add_food_win(self, window):
+    def food_win(self, window):
+        frame = tk.Frame(window)
+        lab_title = tk.Label(frame, text="List of Foods")
+        list_food = tk.Listbox(frame)
+        for food in self.food_list.food:
+            list_food.insert(tk.END, food.name)
+        but_remove = tk.Button(frame, text="Remove Food", command=partial(self.remove_food, list_food))
+
+        but_add = tk.Button(frame, text="Add Food", command=partial(self.goto_page, "add_food"))
+
+        lab_title.grid(column=1, row=1, columnspan=2, pady=10)
+        list_food.grid(column=1, row=2, rowspan=3, columnspan=2)
+        but_remove.grid(column=1, row=5, padx=10, pady=10)
+        but_add.grid(column=2, row=5, padx=(0, 10), pady=10)
+
+        return frame
+
+    def add_food_win(self, window, chosen_ings=None, food_name=None, search_entry=None):
+        if chosen_ings is None:
+            chosen_ings = []
+
         frame = tk.Frame(window)
 
-        frame.rowconfigure(4, minsize=20)
+        lab_title = tk.Label(frame, text="Select the ingredients of the food")
+        lab_title.grid(row=1, column=1, columnspan=4, pady=10)
 
-        # Middle frame
-        frame2 = tk.Frame(master=frame)
-        frame2.grid(column=2, row=1)
+        food_name_lab = tk.Label(frame, text="Name of the food")
+        food_name_lab.grid(row=2, column=1, sticky="W", padx=10)
+        food_name_entry = tk.Entry(frame, width=82)
+        if food_name is not None:
+            food_name_entry.insert(0, food_name)
+        food_name_entry.grid(row=3, column=1, columnspan=4, sticky="W", padx=10, pady=(0, 5))
 
-        # Content of left frame
-        listbox_left = tk.Listbox(frame)
-        for food in self.food_list.food:
-            listbox_left.insert(tk.END, food.name)
-        listbox_left.grid(column=1, row=1, rowspan=4, pady=15, padx=10)
+        all_ing_lab = tk.Label(frame, text="All ingredients")
+        all_ing_lab.grid(row=4, column=1, padx=(10, 5))
 
-        # Content of middle frame
-        entry = tk.Entry(frame2)
-        entry.grid(column=2, row=1, padx=(0, 10), pady=(11, 10))
+        selected_ing_lab = tk.Label(frame, text="Selected ingredients")
+        selected_ing_lab.grid(row=4, column=4, padx=(5, 10))
 
-        # Buttons' functionality
-        button_add = partial(self.add_food, entry)
-        button_remove = partial(self.remove_food)
+        filtered_ing_list = self.ingredient_list.ingredients
+        if search_entry:
+            filtered_ing_list = re.findall(search_entry.get(), filtered_ing_list)
 
-        # Buttons of middle frame
-        button_add = tk.Button(frame2, text="Add", command=button_add)
-        button_remove = tk.Button(frame2, text="Delete", command=button_remove)
-        button_add.grid(column=2, row=2, pady=(0, 10))
-        button_remove.grid(column=2, row=3, pady=(0, 10))
+        all_ing_list = tk.Listbox(frame, width=33)
+        for ing in self.ingredient_list.ingredients:
+            all_ing_list.insert(tk.END, ing.name)
+        all_ing_list.grid(row=5, column=1, padx=(10, 0), pady=(0, 5))
+        scrollbar1 = tk.Scrollbar(frame)
+        all_ing_list.config(yscrollcommand=scrollbar1.set)
+        scrollbar1.config(command=all_ing_list.yview)
+        scrollbar1.grid(row=5, column=2, padx=(0, 5), sticky="wns")
 
-        # Content of left frame
-        listbox_right = tk.Listbox(frame)
-        for food in self.food_list.food:
-            listbox_right.insert(tk.END, food.name)
-        listbox_right.grid(column=3, row=1, rowspan=4, pady=15, padx=10)
+        add_ingredient_button = tk.Button(frame, text="->", command=partial(self.add_food_ingredients, all_ing_list,
+                                                                            chosen_ings, food_name_entry))
+        add_ingredient_button.grid(row=5, column=3)
+
+        selected_ing_list = tk.Listbox(frame, width=33)
+        for ing in chosen_ings:
+            selected_ing_list.insert(tk.END, ing.name)
+        selected_ing_list.grid(row=5, column=4, padx=(5, 0), pady=(0, 5))
+        scrollbar2 = tk.Scrollbar(frame)
+        selected_ing_list.config(yscrollcommand=scrollbar2.set)
+        scrollbar2.config(command=selected_ing_list.yview)
+        scrollbar2.grid(row=5, column=5, padx=(0, 10), sticky="wns")
+
+        search_frame = tk.Frame(frame)
+        search_entry = tk.Entry(search_frame, width=20)
+        search_entry.grid(row=1, column=2, ipady=3)
+        search_frame.grid(row=6, column=1, pady=(0, 10))
+        search_button = tk.Button(search_frame, text="Search", command=partial(self.add_food_ingredients, all_ing_list,
+                                                                            chosen_ings, food_name_entry, search_entry))
+        search_button.grid(row=1, column=1)
+
+        next_button = tk.Button(frame, text="Next", width=26, command=partial(self.add_food, food_name_entry,
+                                                                              chosen_ings))
+        next_button.grid(row=6, column=4, pady=(0, 10))
 
         return frame
 
@@ -161,3 +244,23 @@ class Windows:
         add_button.grid(column=1, row=row_num, columnspan=2, pady=(5, 10))
 
         return frame
+
+    def food_list_of_ingredients(self, window, new_food):
+        frame = tk.Frame(window)
+
+        if new_food is not None:
+            lab_title = tk.Label(frame, text="Edit ingredients' proportions of " + new_food.name)
+            lab_title.grid(row=1, column=1, columnspan=2)
+
+            ing_list = tk.Listbox(frame, width=35)
+            for ing in new_food.ingredients:
+                ing_list.insert(tk.END, ing.name)
+            ing_list.grid(row=2, column=1)
+
+            scrollbar = tk.Scrollbar(frame)
+            ing_list.config(yscrollcommand=scrollbar.set)
+            scrollbar.config(command=ing_list.yview)
+            scrollbar.grid(row=2, column=2, sticky="wns")
+
+        return frame
+
