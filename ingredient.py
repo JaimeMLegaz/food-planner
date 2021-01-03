@@ -11,6 +11,9 @@ class Ingredient:
         return hash(self.name)
 
     def __eq__(self, other):
+        return self.name == other.name
+
+    def extensive_eq(self, other):
         return((self.name == other.name) and
                (self.calories == other.calories) and
                (self.carbs == other.carbs) and
