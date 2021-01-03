@@ -36,6 +36,10 @@ class Windows:
         self.frames["add_food"] = self.add_food_win(self.window, chosen_ings, food_name_entry, search_entry.get())
         self.goto_page("add_food")
 
+    def filter_ingredients(self, search_entry):
+        self.frames["ings"] = self.ingredients_win(self.window, search_entry.get())
+        self.goto_page("ings")
+
     # TODO: PASS NOT ONLY THE INDEX BUT BOTH LISTS, CHECK THE INDEX IN THE FULL LIST FOR THE ITEM CHOSEN,
     # AND THEN APPLY THE OLD METHODS FOR REMOVAL, USING THE INDEX NOT THE ITEM. REMOVE THE EXTENSIVE_EQ METHOD
     def remove_food(self, food):
@@ -58,9 +62,16 @@ class Windows:
         self.frames["ings"] = self.ingredients_win(self.window)
         self.goto_page("ings")
 
-    def remove_ingredient(self, ingredient):
+    def remove_ingredient(self, ingredient, full_list, filtered_list):
         if ingredient.curselection():
-            self.ingredient_list.remove_ingredient(ingredient.curselection()[0])
+            if len(full_list) > len(filtered_list):
+                filtered_ing_index = ingredient.curselection()[0]
+                selected_ing = filtered_list[filtered_ing_index]
+                selected_ing_index = full_list.index(selected_ing)
+            else:
+                selected_ing_index = ingredient.curselection()[0]
+
+            self.ingredient_list.remove_ingredient(selected_ing_index)
         # Refresh the frame
         self.frames["ings"] = self.ingredients_win(self.window)
         self.goto_page("ings")
@@ -88,26 +99,44 @@ class Windows:
         else:
             print("NONAME")
 
-    def ingredients_win(self, window):
+    def ingredients_win(self, window, search_filter=None):
         frame = tk.Frame(window)
 
         lab_title = tk.Label(frame, text="List of Ingredients")
+
+        filtered_ing_list = [ing.name for ing in self.ingredient_list.ingredients]
+        if search_filter:
+            r = re.compile(".*" + search_filter + ".*")
+            filtered_ing_list = list(filter(r.match, filtered_ing_list))
+
         list_ing = tk.Listbox(frame, width=43)
-        for ing in self.ingredient_list.ingredients:
-            list_ing.insert(tk.END, ing.name)
-        but_remove = tk.Button(frame, text="Remove Ingredient", command=partial(self.remove_ingredient, list_ing))
+        for ing in filtered_ing_list:
+            list_ing.insert(tk.END, ing)
+        but_remove = tk.Button(frame, text="Remove Ingredient", command=partial(self.remove_ingredient, list_ing,
+                                                                                self.ingredient_list.ingredients,
+                                                                                filtered_ing_list))
 
         scrollbar = tk.Scrollbar(frame)
         list_ing.config(yscrollcommand=scrollbar.set)
         scrollbar.config(command=list_ing.yview)
+
+
 
         but_add = tk.Button(frame, text="Add Ingredient", command=partial(self.goto_page, "add_ing"))
 
         lab_title.grid(column=1, row=1, columnspan=2, pady=10)
         list_ing.grid(column=1, row=2, rowspan=3, columnspan=2, padx=(10, 0))
         scrollbar.grid(column=3, row=2, rowspan=3, sticky="wns", padx=(0, 10))
-        but_remove.grid(column=1, row=5, padx=10, pady=10)
-        but_add.grid(column=2, row=5, padx=(0, 10), pady=10)
+
+        frame2 = tk.Frame(frame)
+        frame2.grid(column=1, columnspan=3, row=5)
+        search_entry = tk.Entry(frame2, width=35)
+        search_button = tk.Button(frame2, text="Search", command=partial(self.filter_ingredients, search_entry))
+        search_entry.grid(column=1, row=5, columnspan=2, sticky="e")
+        search_button.grid(column=3, row=5, sticky="w")
+
+        but_remove.grid(column=1, row=6, padx=10, pady=10)
+        but_add.grid(column=2, row=6, padx=(0, 10), pady=10)
 
         return frame
 

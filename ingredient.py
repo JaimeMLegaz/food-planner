@@ -11,7 +11,9 @@ class Ingredient:
         return hash(self.name)
 
     def __eq__(self, other):
-        return self.name == other.name
+        if isinstance(other, Ingredient):
+            return self.name == other.name
+        return self.name == other
 
     def extensive_eq(self, other):
         return((self.name == other.name) and
