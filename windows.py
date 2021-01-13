@@ -41,8 +41,6 @@ class Windows:
         self.frames["ings"] = self.ingredients_win(self.window, search_entry.get())
         self.goto_page("ings")
 
-    # TODO: PASS NOT ONLY THE INDEX BUT BOTH LISTS, CHECK THE INDEX IN THE FULL LIST FOR THE ITEM CHOSEN,
-    # AND THEN APPLY THE OLD METHODS FOR REMOVAL, USING THE INDEX NOT THE ITEM. REMOVE THE EXTENSIVE_EQ METHOD
     def remove_food(self, food):
         if food.curselection():
             self.food_list.remove_food(food.curselection()[0])  # TODO Add method
@@ -303,6 +301,9 @@ class Windows:
             self.frames["edit_ing_prop"] = self.edit_ing_proportions_win(window, ingredient.curselection()[0], new_food)
             self.goto_page("edit_ing_prop")
 
+    def finish_adding_food(self, food):
+        self.food_list.add_food(food)
+        self.goto_page("main")
 
     def food_list_of_ingredients(self, window, new_food):
         frame = tk.Frame(window)
@@ -324,11 +325,19 @@ class Windows:
             edit_button = tk.Button(frame, text="Edit ingredient", width=30,
                                     command=partial(self.to_edit_ing_prop, window, ing_list, new_food))
             edit_button.grid(row=3, column=1, columnspan=2, pady=(0, 5))
-            finish_button = tk.Button(frame, text="Finish", width=30)
+            finish_button = tk.Button(frame, text="Finish", width=30,
+                                      command=partial(self.finish_adding_food, new_food))
             finish_button.grid(row=4, column=1, columnspan=2, pady=(0, 10))
             finish_button.config(height=2)
 
         return frame
+
+    def update_ing_proportions(self, window, ingredient, food, minimum, maximum):
+        food.minimums[ingredient.name] = minimum.get()
+        food.maximums[ingredient.name] = maximum.get()
+        # Change window
+        self.frames["food_list_ing"] = self.food_list_of_ingredients(window, food)
+        self.goto_page("food_list_ing")
 
     def edit_ing_proportions_win(self, window, ingredient_index=None, food=None):
         frame = tk.Frame(window)
@@ -357,7 +366,9 @@ class Windows:
             entry_max.insert(0, max_ration)
             entry_max.grid(column=2, row=4, padx=(0, 10), pady=(0, 10))
 
-            save_button = tk.Button(frame, text="Save", width=20)
+            save_button = tk.Button(frame, text="Save", width=20, command=partial(self.update_ing_proportions,
+                                                                                  window, ingredient, food,
+                                                                                  entry_min, entry_max))
             save_button.grid(column=1, columnspan=2, row=5, pady=(0, 10))
 
         return frame
